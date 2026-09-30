@@ -467,6 +467,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Обычно зарубежный DNS",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Фильтр fallback"),
+    "favorite": MessageLookupByLibrary.simpleMessage("В избранное"),
+    "favorites": MessageLookupByLibrary.simpleMessage("Избранное"),
     "fidelityScheme": MessageLookupByLibrary.simpleMessage("Точная передача"),
     "file": MessageLookupByLibrary.simpleMessage("Файл"),
     "fileDesc": MessageLookupByLibrary.simpleMessage(
@@ -1204,6 +1206,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "turnOff": MessageLookupByLibrary.simpleMessage("Выключить"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Включить"),
     "undo": MessageLookupByLibrary.simpleMessage("Отменить"),
+    "unfavorite": MessageLookupByLibrary.simpleMessage("Удалить из избранного"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("Единая задержка"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(
       "Убирает лишние задержки, например рукопожатие",

@@ -453,6 +453,8 @@ class MessageLookup extends MessageLookupByLibrary {
       "Usually an overseas DNS",
     ),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("Fallback filter"),
+    "favorite": MessageLookupByLibrary.simpleMessage("Favorite"),
+    "favorites": MessageLookupByLibrary.simpleMessage("Favorites"),
     "fidelityScheme": MessageLookupByLibrary.simpleMessage("Fidelity"),
     "file": MessageLookupByLibrary.simpleMessage("File"),
     "fileDesc": MessageLookupByLibrary.simpleMessage(
@@ -1150,6 +1152,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "turnOff": MessageLookupByLibrary.simpleMessage("Turn off"),
     "turnOn": MessageLookupByLibrary.simpleMessage("Turn on"),
     "undo": MessageLookupByLibrary.simpleMessage("Undo"),
+    "unfavorite": MessageLookupByLibrary.simpleMessage("Unfavorite"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("Unified delay"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(
       "Remove extra delays such as handshakes",

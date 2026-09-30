@@ -119,11 +119,44 @@ class ProxyCard extends ConsumerWidget {
     );
   }
 
+  Widget _buildFavoriteButton(BuildContext context, WidgetRef ref) {
+    final isFavorite = ref.watch(
+      currentProfileProvider.select(
+        (profile) => profile?.favoriteProxies.contains(proxy.name) ?? false,
+      ),
+    );
+    return SizedBox(
+      height: measure.bodyMediumHeight,
+      width: measure.bodyMediumHeight,
+      child: IconButton(
+        tooltip: isFavorite
+            ? context.appLocalizations.unfavorite
+            : context.appLocalizations.favorite,
+        icon: Icon(
+          isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
+          color: isFavorite
+              ? Colors.amber
+              : Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+        ),
+        iconSize: measure.bodyMediumHeight,
+        padding: EdgeInsets.zero,
+        onPressed: () {
+          ref
+              .read(proxiesActionProvider.notifier)
+              .toggleFavoriteProxy(proxy.name);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final measure = globalState.measure;
     final delayText = _buildDelayText();
     final proxyNameText = _buildProxyNameText(context);
+    final favoriteButton = _buildFavoriteButton(context, ref);
     return Stack(
       children: [
         Consumer(
@@ -148,7 +181,13 @@ class ProxyCard extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                proxyNameText,
+                Row(
+                  children: [
+                    Expanded(child: proxyNameText),
+                    const SizedBox(width: 4),
+                    favoriteButton,
+                  ],
+                ),
                 const SizedBox(height: 8),
                 if (type == ProxyCardType.expand) ...[
                   SizedBox(

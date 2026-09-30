@@ -54,6 +54,7 @@ abstract class Profile with _$Profile {
     @Default(true) bool autoUpdate,
     @Default({}) Map<String, String> selectedMap,
     @Default({}) Set<String> unfoldSet,
+    @Default([]) List<String> favoriteProxies,
     @Default(OverwriteType.standard) OverwriteType overwriteType,
     int? scriptId,
     String? matchTarget,

@@ -32,6 +32,9 @@ class Profiles extends Table {
 
   TextColumn get unfoldSet => text().map(const StringSetConverter())();
 
+  TextColumn get favoriteProxies =>
+      text().map(const StringListConverter()).nullable()();
+
   IntColumn get order => integer().nullable()();
 
   @override
@@ -119,6 +122,7 @@ extension RawProfilExt on RawProfile {
       autoUpdate: autoUpdate,
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,
+      favoriteProxies: favoriteProxies ?? [],
       overwriteType: overwriteType,
       scriptId: scriptId,
       matchTarget: matchTarget,
@@ -140,6 +144,7 @@ extension ProfilesCompanionExt on Profile {
       autoUpdate: autoUpdate,
       selectedMap: selectedMap,
       unfoldSet: unfoldSet,
+      favoriteProxies: Value(favoriteProxies),
       overwriteType: overwriteType,
       scriptId: Value(scriptId),
       matchTarget: Value(matchTarget),

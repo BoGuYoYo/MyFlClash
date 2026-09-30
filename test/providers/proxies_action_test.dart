@@ -22,6 +22,22 @@ import '../helpers/test_profiles.dart';
 
 class MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
+class _TestSetupAction extends SetupAction {
+  int applyProfileCount = 0;
+  bool? lastForce;
+
+  @override
+  Future<bool> applyProfile({
+    bool silence = false,
+    bool force = false,
+    Future<void> Function()? preloadInvoke,
+  }) async {
+    applyProfileCount++;
+    lastForce = force;
+    return true;
+  }
+}
+
 const _testUrl = 'http://delay.test';
 
 Group _group(String name, List<Proxy> all) =>
@@ -716,5 +732,46 @@ void main() {
         'Auto',
       });
     });
+
+    test('toggleFavoriteProxy is a no-op without a current profile', () async {
+      final container = buildContainer();
+
+      await actionOf(container).toggleFavoriteProxy('Node A');
+
+      expect(container.read(profilesProvider), isEmpty);
+    });
+
+    test(
+      'toggleFavoriteProxy toggles proxy in current profile and calls applyProfile',
+      () async {
+        final profile = Profile.normal(label: 'p');
+        final testSetup = _TestSetupAction();
+        final container = ProviderContainer(
+          overrides: [
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            profilesProvider.overrideWith(() => TestProfiles([profile])),
+            currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
+            setupActionProvider.overrideWith(() => testSetup),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        await actionOf(container).toggleFavoriteProxy('Node A');
+
+        expect(container.read(profilesProvider).single.favoriteProxies, [
+          'Node A',
+        ]);
+        expect(testSetup.applyProfileCount, 1);
+        expect(testSetup.lastForce, isTrue);
+
+        await actionOf(container).toggleFavoriteProxy('Node A');
+
+        expect(
+          container.read(profilesProvider).single.favoriteProxies,
+          isEmpty,
+        );
+        expect(testSetup.applyProfileCount, 2);
+      },
+    );
   });
 }

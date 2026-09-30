@@ -366,6 +366,7 @@ class SetupAction extends _$SetupAction {
         defaultUA: defaultUA,
         authentication: networkSetting.authentication.credentials,
         matchTarget: setupState.matchTarget,
+        favoriteProxies: setupState.favoriteProxies,
       ),
     );
     return res;

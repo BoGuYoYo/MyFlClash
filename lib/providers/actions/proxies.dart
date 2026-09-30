@@ -130,6 +130,21 @@ class ProxiesAction extends _$ProxiesAction {
         .put(currentProfile.copyWith(unfoldSet: value));
   }
 
+  Future<void> toggleFavoriteProxy(String proxyName) async {
+    final currentProfile = ref.read(currentProfileProvider);
+    if (currentProfile == null) return;
+    final currentFavorites = List<String>.from(currentProfile.favoriteProxies);
+    if (currentFavorites.contains(proxyName)) {
+      currentFavorites.remove(proxyName);
+    } else {
+      currentFavorites.add(proxyName);
+    }
+    ref
+        .read(profilesProvider.notifier)
+        .put(currentProfile.copyWith(favoriteProxies: currentFavorites));
+    await ref.read(setupActionProvider.notifier).applyProfile(force: true);
+  }
+
   void setDelay(Delay delay) {
     ref.read(delayDataSourceProvider.notifier).setDelay(delay);
   }

@@ -369,6 +369,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "fallback": MessageLookupByLibrary.simpleMessage("フォールバック"),
     "fallbackDesc": MessageLookupByLibrary.simpleMessage("通常は国外のDNSを使用します"),
     "fallbackFilter": MessageLookupByLibrary.simpleMessage("フォールバックフィルター"),
+    "favorite": MessageLookupByLibrary.simpleMessage("お気に入り"),
+    "favorites": MessageLookupByLibrary.simpleMessage("お気に入り"),
     "fidelityScheme": MessageLookupByLibrary.simpleMessage("フィデリティ"),
     "file": MessageLookupByLibrary.simpleMessage("ファイル"),
     "fileDesc": MessageLookupByLibrary.simpleMessage("プロファイルファイルを直接アップロードします"),
@@ -959,6 +961,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "turnOff": MessageLookupByLibrary.simpleMessage("オフにする"),
     "turnOn": MessageLookupByLibrary.simpleMessage("オンにする"),
     "undo": MessageLookupByLibrary.simpleMessage("元に戻す"),
+    "unfavorite": MessageLookupByLibrary.simpleMessage("お気に入りを解除"),
     "unifiedDelay": MessageLookupByLibrary.simpleMessage("統一遅延"),
     "unifiedDelayDesc": MessageLookupByLibrary.simpleMessage(
       "ハンドシェイクなどの余分な遅延を除きます",

@@ -74,5 +74,6 @@ Future<SetupState> setupState(Ref ref, int? profileId) async {
     matchTarget: overwriteType == OverwriteType.standard
         ? profile?.matchTarget
         : null,
+    favoriteProxies: profile?.favoriteProxies ?? [],
   );
 }

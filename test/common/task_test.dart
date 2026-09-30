@@ -220,11 +220,11 @@ void main() {
       expect(config['sniffer']['sniff']['HTTP']['ports'], ['80', '443']);
       expect(
         config['proxy-providers']['remote']['path'],
-        startsWith('/profiles/providers/7/proxies/'),
+        startsWith(join('/profiles', 'providers', '7', 'proxies')),
       );
       expect(
         config['rule-providers']['remote']['path'],
-        startsWith('/profiles/providers/7/rules/'),
+        startsWith(join('/profiles', 'providers', '7', 'rules')),
       );
       expect(config['rules'], [
         'DOMAIN-SUFFIX,added.example,Original',
@@ -576,5 +576,149 @@ void main() {
     expect(encoded, contains('first'));
     expect(encoded, contains('\n'));
     expect(await mapListTask([1, 2, 3], _double), [2, 4, 6]);
+  });
+
+  group('makeRealProfileTask favorite proxies injection', () {
+    test(
+      'injects favorites proxy group and prepends to selector groups',
+      () async {
+        final rawConfig = <String, dynamic>{
+          'proxies': [
+            {'name': 'Node A', 'type': 'ss'},
+            {'name': 'Node B', 'type': 'vmess'},
+            {'name': 'Node C', 'type': 'trojan'},
+          ],
+          'proxy-groups': [
+            {
+              'name': 'PROXY',
+              'type': 'select',
+              'proxies': ['Node A', 'Node B'],
+            },
+            {
+              'name': 'Auto',
+              'type': 'url-test',
+              'proxies': ['Node A', 'Node B'],
+            },
+          ],
+        };
+
+        final result = await makeRealProfileTask(
+          MakeRealProfileState(
+            profilesPath: '/profiles',
+            profileId: 1,
+            rawConfig: rawConfig,
+            realPatchConfig: const PatchClashConfig(),
+            overrideDns: false,
+            appendSystemDns: false,
+            proxyGroups: const [],
+            rules: const [],
+            addedRules: const [],
+            defaultUA: 'FlClash',
+            favoriteProxies: const ['Node B', 'NonExistent'],
+          ),
+        );
+
+        final config = loadYaml(result.yaml) as YamlMap;
+        final groups = config['proxy-groups'] as YamlList;
+
+        expect(groups, hasLength(3));
+        final favGroup = groups[0] as YamlMap;
+        expect(favGroup['name'], favoritesGroupName);
+        expect(favGroup['type'], 'select');
+        expect(favGroup['proxies'], ['Node B']);
+
+        final proxyGroup = groups[1] as YamlMap;
+        expect(proxyGroup['name'], 'PROXY');
+        expect(proxyGroup['proxies'], [favoritesGroupName, 'Node A', 'Node B']);
+
+        final autoGroup = groups[2] as YamlMap;
+        expect(autoGroup['name'], 'Auto');
+        expect(autoGroup['proxies'], ['Node A', 'Node B']);
+      },
+    );
+
+    test(
+      'falls back to DIRECT when favorite proxies do not match available nodes',
+      () async {
+        final rawConfig = <String, dynamic>{
+          'proxies': [
+            {'name': 'Node A', 'type': 'ss'},
+          ],
+          'proxy-groups': [
+            {
+              'name': 'PROXY',
+              'type': 'select',
+              'proxies': ['Node A'],
+            },
+          ],
+        };
+
+        final result = await makeRealProfileTask(
+          MakeRealProfileState(
+            profilesPath: '/profiles',
+            profileId: 1,
+            rawConfig: rawConfig,
+            realPatchConfig: const PatchClashConfig(),
+            overrideDns: false,
+            appendSystemDns: false,
+            proxyGroups: const [],
+            rules: const [],
+            addedRules: const [],
+            defaultUA: 'FlClash',
+            favoriteProxies: const ['Deleted Node'],
+          ),
+        );
+
+        final config = loadYaml(result.yaml) as YamlMap;
+        final groups = config['proxy-groups'] as YamlList;
+        final favGroup = groups[0] as YamlMap;
+        expect(favGroup['name'], favoritesGroupName);
+        expect(favGroup['proxies'], ['DIRECT']);
+      },
+    );
+
+    test(
+      'injects favorites when proxyGroups override contains ProxyGroup objects',
+      () async {
+        final result = await makeRealProfileTask(
+          const MakeRealProfileState(
+            profilesPath: '/profiles',
+            profileId: 1,
+            rawConfig: {
+              'proxies': [
+                {'name': 'Node 1', 'type': 'ss'},
+              ],
+            },
+            realPatchConfig: PatchClashConfig(),
+            overrideDns: false,
+            appendSystemDns: false,
+            proxyGroups: [
+              ProxyGroup(
+                id: 1,
+                name: 'SelectGroup',
+                type: GroupType.Selector,
+                proxies: ['Node 1'],
+              ),
+            ],
+            rules: [],
+            addedRules: [],
+            defaultUA: 'FlClash',
+            favoriteProxies: ['Node 1'],
+          ),
+        );
+
+        final config = loadYaml(result.yaml) as YamlMap;
+        final groups = config['proxy-groups'] as YamlList;
+
+        expect(groups, hasLength(2));
+        final favGroup = groups[0] as YamlMap;
+        expect(favGroup['name'], favoritesGroupName);
+        expect(favGroup['proxies'], ['Node 1']);
+
+        final selectGroup = groups[1] as YamlMap;
+        expect(selectGroup['name'], 'SelectGroup');
+        expect(selectGroup['proxies'], [favoritesGroupName, 'Node 1']);
+      },
+    );
   });
 }

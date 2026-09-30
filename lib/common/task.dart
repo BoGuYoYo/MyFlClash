@@ -296,6 +296,81 @@ Future<({String yaml, String md5})> _makeRealProfileTask(
   if (data.proxyGroups.isNotEmpty) {
     rawConfig['proxy-groups'] = data.proxyGroups;
   }
+  if (data.favoriteProxies.isNotEmpty) {
+    final availableProxyNames = <String>{};
+    if (rawConfig['proxies'] is List) {
+      for (final p in rawConfig['proxies']) {
+        if (p is Map && p['name'] != null) {
+          availableProxyNames.add(p['name'].toString());
+        } else if (p is Proxy) {
+          availableProxyNames.add(p.name);
+        }
+      }
+    }
+    final validFavorites = availableProxyNames.isEmpty
+        ? data.favoriteProxies
+        : data.favoriteProxies.where(availableProxyNames.contains).toList();
+    final proxiesToUse = validFavorites.isNotEmpty
+        ? validFavorites
+        : ['DIRECT'];
+
+    final rawGroups = rawConfig['proxy-groups'];
+    final groupsList = rawGroups is List ? rawGroups : <dynamic>[];
+
+    if (groupsList.isNotEmpty && groupsList.first is ProxyGroup) {
+      final newGroups = <ProxyGroup>[
+        ProxyGroup(
+          id: snowflake.id,
+          name: favoritesGroupName,
+          type: GroupType.Selector,
+          proxies: proxiesToUse,
+          icon: 'star',
+        ),
+      ];
+      for (final item in groupsList) {
+        if (item is ProxyGroup) {
+          if (item.name == favoritesGroupName) continue;
+          if (item.type == GroupType.Selector && item.proxies != null) {
+            final pList = List<String>.from(item.proxies!);
+            if (!pList.contains(favoritesGroupName)) {
+              pList.insert(0, favoritesGroupName);
+            }
+            newGroups.add(item.copyWith(proxies: pList));
+          } else {
+            newGroups.add(item);
+          }
+        }
+      }
+      rawConfig['proxy-groups'] = newGroups;
+    } else {
+      final newGroups = <dynamic>[
+        {
+          'name': favoritesGroupName,
+          'type': 'select',
+          'proxies': proxiesToUse,
+          'icon': 'star',
+        },
+      ];
+      for (final item in groupsList) {
+        if (item is Map) {
+          final groupMap = Map<String, dynamic>.from(item);
+          if (groupMap['name'] == favoritesGroupName) continue;
+          final typeStr = groupMap['type']?.toString().toLowerCase();
+          if (typeStr == 'select' && groupMap['proxies'] is List) {
+            final pList = List<dynamic>.from(groupMap['proxies']);
+            if (!pList.contains(favoritesGroupName)) {
+              pList.insert(0, favoritesGroupName);
+            }
+            groupMap['proxies'] = pList;
+          }
+          newGroups.add(groupMap);
+        } else {
+          newGroups.add(item);
+        }
+      }
+      rawConfig['proxy-groups'] = newGroups;
+    }
+  }
   rawConfig['rules'] = rules;
   final yaml = await _encodeYaml(Map<String, dynamic>.from(rawConfig));
   return (yaml: yaml, md5: yaml.toMd5());
